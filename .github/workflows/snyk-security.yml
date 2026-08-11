@@ -1,49 +1,60 @@
 name: Snyk CI/CD Demo
+
 on:
   push:
-    branches: ["main"]
+    branches: ["main"]        # Runs whenever code is pushed directly to main
   pull_request:
-    branches: ["main"]
+    branches: ["main"]        # Runs whenever a PR is opened/updated targeting main
 
 jobs:
-  security:
-    runs-on: ubuntu-latest
+  security:                   
+    runs-on: ubuntu-latest     
+
+    # Environment variables available to every step in this job
     env:
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      SNYK_ORG: ${{ vars.SNYK_ORG }}
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}   
+      SNYK_ORG: ${{ vars.SNYK_ORG }}          
     steps:
+      # Step 1: Pull the repo's code onto the runner so later steps can access it
       - uses: actions/checkout@v4
 
+      # Step 2: Install Node.js
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
+      # Step 3: Install the project's own dependencies (package.json)
       - name: Install dependencies
         run: npm install
 
+      # Step 4: Install the Snyk CLI globally so `snyk` commands work in later steps
       - name: Install Snyk CLI
         run: npm install -g snyk
 
-      # Snyk Open Source (SCA)
+      # Step 5: Run Snyk Open Source (SCA) scan
+      # `|| true` means this step will NEVER fail the pipeline, even if issues are found
       - name: Snyk SCA
         run: snyk test || true
 
-      # Continuous monitoring - does not fail the build
+      # Step 6: Snapshot current dependencies to the Snyk dashboard for ongoing monitoring/alerts
+      # Only runs on a push to main (not on every PR) to avoid duplicate/noisy snapshots
+      # This step does NOT fail the build — it's for visibility/tracking only
       - name: Snyk Open Source monitor
         if: github.event_name == 'push'
         run: snyk monitor --all-projects
 
-      # PR gate - fails build on high/critical, only runs on pull_request
+      # --- Currently disabled: PR gate ---
+      # This step (if enabled) would run only on pull requests and FAIL the build
+      # if High or Critical severity issues are found — blocking the PR from being
+      # merged via CI. It uses the official Snyk GitHub Action instead of raw CLI.
+      # Uncomment to re-enable hard-blocking on PRs in addition to SCM-native PR checks.
+      #
       # - name: Snyk test (PR gate)
-      #  if: github.event_name == 'pull_request'
-      #  uses: snyk/actions/node@master
-      #  env:
-      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #  with:
-      #    command: test
-      #    args: --severity-threshold=high
-
-      # Snyk Code (SAST) - use || true so a failed scan doesn't kill the pipeline
-      # - name: Snyk Code test
-      #  run: snyk code test --sarif > snyk-code.sarif || true
+      #   if: github.event_name == 'pull_request'
+      #   uses: snyk/actions/node@master
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #   with:
+      #     command: test
+      #     args: --severity-threshold=high
