@@ -1,4 +1,4 @@
-name: Snyk Security
+name: Snyk CI/CD Demo
 on:
   push:
     branches: ["main"]
@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      SNYK_ORG: ${{ vars.SNYK_ORG }}
     steps:
       - uses: actions/checkout@v4
 
