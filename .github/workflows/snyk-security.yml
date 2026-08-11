@@ -42,8 +42,8 @@ jobs:
       # This step does NOT fail the build — it's for visibility/tracking only
       - name: Snyk Open Source monitor
         if: github.event_name == 'push'
-        run: snyk monitor --org=${{ vars.SNYK_ORG }} --all-project --remote-repo-url=--remote-repo-url=https://github.com/mawidors/Demo.git
-
+        run: snyk monitor --org=${{ vars.SNYK_ORG }} --all-project
+        
       # --- Currently disabled: PR gate ---
       # This step (if enabled) would run only on pull requests and FAIL the build
       # if High or Critical severity issues are found — blocking the PR from being
