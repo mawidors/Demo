@@ -42,7 +42,7 @@ jobs:
       # This step does NOT fail the build — it's for visibility/tracking only
       - name: Snyk Open Source monitor
         if: github.event_name == 'push'
-        run: snyk monitor --org=${{ vars.SNYK_ORG }} --project-name=package.json --all-projects
+        run: snyk monitor --org=${{ vars.SNYK_ORG }} --all-project --remote-repo-url=--remote-repo-url=https://github.com/mawidors/Demo.git
 
       - name: Snyk Container monitor
         run: snyk container monitor --file=Dockerfile Dockerfile --org=${{ vars.SNYK_ORG }}
