@@ -44,9 +44,6 @@ jobs:
         if: github.event_name == 'push'
         run: snyk monitor --org=${{ vars.SNYK_ORG }} --all-project --remote-repo-url=--remote-repo-url=https://github.com/mawidors/Demo.git
 
-      - name: Snyk Container monitor
-        run: snyk container monitor --file=Dockerfile Dockerfile --org=${{ vars.SNYK_ORG }}
-
       # --- Currently disabled: PR gate ---
       # This step (if enabled) would run only on pull requests and FAIL the build
       # if High or Critical severity issues are found — blocking the PR from being
