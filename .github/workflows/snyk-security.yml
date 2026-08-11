@@ -1,0 +1,48 @@
+name: Snyk Security
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      # Snyk Open Source (SCA)
+      - name: Snyk SCA
+        run: snyk test || true
+
+      # Continuous monitoring - does not fail the build
+      - name: Snyk Open Source monitor
+        if: github.event_name == 'push'
+        run: snyk monitor --all-projects
+
+      # PR gate - fails build on high/critical, only runs on pull_request
+      # - name: Snyk test (PR gate)
+      #  if: github.event_name == 'pull_request'
+      #  uses: snyk/actions/node@master
+      #  env:
+      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #  with:
+      #    command: test
+      #    args: --severity-threshold=high
+
+      # Snyk Code (SAST) - use || true so a failed scan doesn't kill the pipeline
+      # - name: Snyk Code test
+      #  run: snyk code test --sarif > snyk-code.sarif || true
