@@ -48,6 +48,7 @@ jobs:
         run: snyk monitor --org=${{ vars.SNYK_ORG }} --all-project
              --project-name=demoapp 
              --remote-repo-url=github.com/mawidors/Demo
+             --target-reference=${{ github.ref_name }}
 
       # Step 7: Run Snyk Code Analysis (SAST) scan
       - name: Snyk Code
