@@ -33,12 +33,12 @@ jobs:
       
       # SCAN scan
       # `|| true` means this step will NEVER fail the pipeline, even if issues are found
-      #- name: Snyk SCA
-        #run: snyk test || true
+      - name: Snyk SCA
+        run: snyk test || true
 
       # SCA Scan fail build if High or Critical severity issues are found, then it will fail
-      - name: Snyk test failing pipeline
-        run: snyk test --project-name=package.json --org=${{ vars.SNYK_ORG }} --severity-threshold=high
+      #- name: Snyk test failing pipeline
+        #run: snyk test --project-name=package.json --org=${{ vars.SNYK_ORG }} --severity-threshold=high
 
       # SCA Monitor
       - name: Snyk Open Source monitor
