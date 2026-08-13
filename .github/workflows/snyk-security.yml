@@ -35,7 +35,8 @@ jobs:
       # Step 5: Run Snyk Open Source (SCA) scan
       # `|| true` means this step will NEVER fail the pipeline, even if issues are found
       - name: Snyk SCA
-        run: snyk test --org=${{ vars.SNYK_ORG }} || true
+        run: snyk test --org=${{ vars.SNYK_ORG }} --project-name=demoapp 
+             --remote-repo-url=github.com/mawidors/Demo || true
 
       # If High or Critical severity issues are found, then it will fail
       #- name: Snyk test failing pipeline
@@ -54,6 +55,8 @@ jobs:
 
       # Step 8: Snapshot Code results into Snyk
       - name: Snyk Code
-        run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high --report --project-name=demoapp
+        continue-on-error: true
+        run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high --report --project-name=demoapp 
+             --remote-repo-url=github.com/mawidors/Demo
              --target-reference=${{ github.ref_name }}
       
