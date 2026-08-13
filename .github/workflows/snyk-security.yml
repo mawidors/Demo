@@ -35,8 +35,7 @@ jobs:
       # Step 5: Run Snyk Open Source (SCA) scan
       # `|| true` means this step will NEVER fail the pipeline, even if issues are found
       - name: Snyk SCA
-        run: snyk test --org=${{ vars.SNYK_ORG }} --project-name=demoapp 
-             --remote-repo-url=github.com/mawidors/Demo || true
+        run: snyk test --org=${{ vars.SNYK_ORG }} || true
 
       # If High or Critical severity issues are found, then it will fail
       #- name: Snyk test failing pipeline
@@ -47,6 +46,8 @@ jobs:
       - name: Snyk Open Source monitor
         if: github.event_name == 'push'
         run: snyk monitor --org=${{ vars.SNYK_ORG }} --all-project
+             --project-name=demoapp 
+             --remote-repo-url=github.com/mawidors/Demo
 
       # Step 7: Run Snyk Code Analysis (SAST) scan
       - name: Snyk Code
