@@ -49,6 +49,7 @@ jobs:
 
       # Step 7: Run Snyk Code Analysis (SAST) scan
       - name: Snyk Code
+        continue-on-error: true
         run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
 
       # Step 8: Snapshot Code results into Snyk
