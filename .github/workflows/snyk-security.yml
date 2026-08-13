@@ -31,20 +31,28 @@ jobs:
       # Step 4: Install the Snyk CLI globally so `snyk` commands work in later steps
       - name: Install Snyk CLI
         run: npm install -g snyk
-
+      
       # Step 5: Run Snyk Open Source (SCA) scan
       # `|| true` means this step will NEVER fail the pipeline, even if issues are found
-      #- name: Snyk SCA
-      #run: snyk test --org=${{ vars.SNYK_ORG }} || true
+      - name: Snyk SCA
+        run: snyk test --org=${{ vars.SNYK_ORG }} || true
 
       # If High or Critical severity issues are found, then it will fail
-      - name: Snyk test (PR gate)
-        run: snyk test --project-name=package.json --org=${{ vars.SNYK_ORG }} --severity-threshold=high
+      #- name: Snyk test failing pipeline
+      #  run: snyk test --project-name=package.json --org=${{ vars.SNYK_ORG }} --severity-threshold=high
 
       # Step 6: Snapshot current dependencies to the Snyk dashboard for ongoing monitoring/alerts
       # Only runs on a push to main (not on every PR) to avoid duplicate/noisy snapshots
-      # This step does NOT fail the build — it's for visibility/tracking only
-      #- name: Snyk Open Source monitor
-      #  if: github.event_name == 'push'
-      #  run: snyk monitor --org=${{ vars.SNYK_ORG }} --all-project
+      - name: Snyk Open Source monitor
+        if: github.event_name == 'push'
+        run: snyk monitor --org=${{ vars.SNYK_ORG }} --all-project
+
+      # Step 7: Run Snyk Code Analysis (SAST) scan
+      - name: Snyk Code
+        run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
+
+      # Step 8: Snapshot Code results into Snyk
+      - name: Snyk Code
+        run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high --report --project-name=demoapp
+             --target-reference=${{ github.ref_name }}
       
