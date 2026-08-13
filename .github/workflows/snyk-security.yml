@@ -12,8 +12,7 @@ jobs:
 
     # Environment variables available to every step in this job
     env:
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}   
-      SNYK_ORG: ${{ vars.SNYK_ORG }}          
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}         
     steps:
       # Step 1: Pull the repo's code onto the runner so later steps can access it
       - uses: actions/checkout@v5
@@ -28,37 +27,36 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # Step 4: Install the Snyk CLI globally so `snyk` commands work in later steps
+      # Install the Snyk CLI globally so `snyk` commands work in later steps
       - name: Install Snyk CLI
         run: npm install -g snyk
       
-      # Step 5: Run Snyk Open Source (SCA) scan
+      # SCAN scan
       # `|| true` means this step will NEVER fail the pipeline, even if issues are found
       - name: Snyk SCA
-        run: snyk test --org=${{ vars.SNYK_ORG }} || true
+        run: snyk test || true
 
-      # If High or Critical severity issues are found, then it will fail
+      # SCA Scan fail build if High or Critical severity issues are found, then it will fail
       #- name: Snyk test failing pipeline
       #  run: snyk test --project-name=package.json --org=${{ vars.SNYK_ORG }} --severity-threshold=high
 
-      # Step 6: Snapshot current dependencies to the Snyk dashboard for ongoing monitoring/alerts
-      # Only runs on a push to main (not on every PR) to avoid duplicate/noisy snapshots
+      # SCA Monitor
       - name: Snyk Open Source monitor
-        if: github.event_name == 'push'
-        run: snyk monitor --org=${{ vars.SNYK_ORG }} --all-project
+        run: snyk monitor
              --project-name=demoapp 
              --remote-repo-url=github.com/mawidors/Demo
              --target-reference=${{ github.ref_name }}
 
-      # Step 7: Run Snyk Code Analysis (SAST) scan
+      # SAST scan
       - name: Snyk Code
         continue-on-error: true
-        run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high
+        run: snyk code test --severity-threshold=high
 
-      # Step 8: Snapshot Code results into Snyk
-      - name: Snyk Code
+      # SAST Snapshot
+      - name: Snyk Code Snapshot Results
         continue-on-error: true
-        run: snyk code test --org=${{ vars.SNYK_ORG }} --severity-threshold=high --report --project-name=demoapp 
+        run: snyk code test --severity-threshold=high --report 
+             --project-name=demoapp 
              --remote-repo-url=github.com/mawidors/Demo
              --target-reference=${{ github.ref_name }}
       
